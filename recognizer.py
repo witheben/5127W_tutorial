@@ -6,9 +6,9 @@ from tqdm import tqdm
 
 highest_score = 0
 image = ""
-for i in tqdm(os.listdir("references")):
-    img1 = cv.imread(os.path.join("references", i), cv.IMREAD_GRAYSCALE)          # queryImage
-    img2 = cv.imread('test_inputs/6roll.jpg', cv.IMREAD_GRAYSCALE) # trainImage
+for i in tqdm(os.listdir("references/d12-v3")):
+    img1 = cv.imread(os.path.join("references/d12-v3", i), cv.IMREAD_GRAYSCALE)          # queryImage
+    img2 = cv.imread('test_inputs/d12-v2/4.jpg', cv.IMREAD_GRAYSCALE) # trainImag
     
     # Initiate ORB detector
     orb = cv.ORB_create()
@@ -33,7 +33,9 @@ for i in tqdm(os.listdir("references")):
     if len(matches) > highest_score:
         highest_score = len(matches)
         image = i
-    
+    # print()
+    # print(i)
+    # print(len(matches))
     # plt.imshow(img3),plt.show()
 print(highest_score)
 print(image)
