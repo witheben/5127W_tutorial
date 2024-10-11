@@ -2,17 +2,22 @@ import cv2
 import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
+from PIL import Image
+from PIL import ImageTk
 
 import tkinter as tk
+
+cv2image = None
 
 def dice_roll(ref_images_path, query_image):
     highest_score = 0
     image = ""
     # ref_images_path = "references/d12-v3"
     # query_image = "test_inputs/d12-v2/4.jpg"
+    img2 = query_image
     for i in tqdm(os.listdir(ref_images_path)):
         img1 = cv2.imread(os.path.join(ref_images_path, i), cv2.IMREAD_GRAYSCALE)
-        img2 = cv2.imread(query_image, cv2.IMREAD_GRAYSCALE)
+        # img2 = cv2.imread(query_image, cv2.IMREAD_GRAYSCALE)
         
         # Initiate ORB detector
         orb = cv2.ORB_create()
@@ -45,29 +50,52 @@ def dice_roll(ref_images_path, query_image):
 
 def run_GUI():
     window = tk.Tk()
-    window.geometry("500x500")
+    window.geometry("500x1000")
     window.title("DnD calculate dice roll")
 
+    # #Graphics window
+    imageFrame = tk.Frame(window, width=600, height=500)
+    imageFrame.grid(row=0, column=0, padx=10, pady=2)
+
+    #Capture video frames
+    lmain = tk.Label(imageFrame)
+    lmain.grid(row=0, column=0)
+    cap = cv2.VideoCapture(0)
+    
+    def show_frame():
+        global cv2image
+        _, frame = cap.read()
+        frame = cv2.flip(frame, 1)
+        cv2image = cv2.cvtColor(frame, cv2.IMREAD_GRAYSCALE)
+        # cv2.imshow('win', cv2image)
+        # cv2.waitKey(0)
+        img = Image.fromarray(cv2image)
+        imgtk = ImageTk.PhotoImage(image=img)
+        lmain.imgtk = imgtk
+        lmain.configure(image=imgtk)
+        lmain.after(10, show_frame) 
     
 
     d_12_roll = tk.Button(
     text="d12 Roll",
     width=10,
     height=5,
-    command=lambda: dice_roll("references/d12-v3")
+    command=lambda: dice_roll("references/d12-v3", cv2image)
     )
     d_20_roll = tk.Button(
         text="d20 Roll",
         width=10,
         height=5,
-        command=lambda: dice_roll("references/d20")
+        command=lambda: dice_roll("references/d20", cv2image)
     )
-    d_12_roll.pack()
-    d_20_roll.pack()
+    d_20_roll.grid(row=2, column=1)
+    d_12_roll.grid(row=1, column=1)
+    # d_12_roll.pack()
+    # d_20_roll.pack()
 
 
 
-    
+    show_frame()
     window.mainloop()
     print("here")
 
