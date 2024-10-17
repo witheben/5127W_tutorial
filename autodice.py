@@ -19,8 +19,6 @@ def usage():
 def autocrop(img, t1 = 100, t2 = 400):
     edges = cv2.Canny(img, t1, t2)
     x, y, w, h = cv2.boundingRect(edges)
-    print(img.shape)
-    print(h, w, x, y)
     return img[y:y+h,x:x+w]
 
 def keypointsAndDescriptors(img):
@@ -91,8 +89,8 @@ def refmatch(img, refdata):
             continue
         
         M, matchesMask, nInliers = findHomographyAndInliers(refdata[i][0][0], kp, matches)
-        print("key: {}".format(i))
-        print("inliers: {}\n".format(nInliers))
+        # print("key: {}".format(i))
+        # print("inliers: {}\n".format(nInliers))
         if nInliers <= 10:
             continue
 
@@ -107,12 +105,10 @@ def refmatch(img, refdata):
         inl.append((scoreFinal(sMatches, sCenterDiff), i))
 
     inl = sorted(inl, reverse = True)
-    print(inl)
     if len(inl) > 1:
         if inl[0][0] > 1.5 * inl[1][0]:
             return inl[0][1]
         else:
-            print(inl)
             return inl[0][1] + '?'
             
     elif len(inl) > 0:
@@ -120,81 +116,81 @@ def refmatch(img, refdata):
     else:
         return '?'
 
-if len(sys.argv) == 1:
-    usage()
+# if len(sys.argv) == 1:
+#     usage()
 
-if sys.argv[1] == "autocrop":    
-    img = cv2.imread(sys.argv[2], -1)
-    cv2.imwrite(sys.argv[3], autocrop(img))
+# if sys.argv[1] == "autocrop":    
+#     img = cv2.imread(sys.argv[2], -1)
+#     cv2.imwrite(sys.argv[3], autocrop(img))
     
-elif sys.argv[1] == "autocrop-test":
-    from matplotlib import pyplot as plt
+# elif sys.argv[1] == "autocrop-test":
+#     from matplotlib import pyplot as plt
     
-    img = cv2.imread(sys.argv[2], -1)
-    plt.imshow(cv2.cvtColor(autocrop(img), cv2.COLOR_BGR2RGB))
-    plt.show()
-    plt.imshow(cv2.Canny(img, 100, 200), cmap='gray')
-    plt.show()
+#     img = cv2.imread(sys.argv[2], -1)
+#     plt.imshow(cv2.cvtColor(autocrop(img), cv2.COLOR_BGR2RGB))
+#     plt.show()
+#     plt.imshow(cv2.Canny(img, 100, 200), cmap='gray')
+#     plt.show()
 
-elif sys.argv[1] == "match-test":
-    from matplotlib import pyplot as plt
+# elif sys.argv[1] == "match-test":
+#     from matplotlib import pyplot as plt
     
-    img1 = cv2.imread(sys.argv[2], -1)
-    img2 = cv2.imread(sys.argv[3], -1)
+#     img1 = cv2.imread(sys.argv[2], -1)
+#     img2 = cv2.imread(sys.argv[3], -1)
 
-    h1, w1, d = img1.shape
-    h2, w2, d = img2.shape
+#     h1, w1, d = img1.shape
+#     h2, w2, d = img2.shape
 
-    kp1, des1 = keypointsAndDescriptors(img1)
-    kp2, des2 = keypointsAndDescriptors(img2)
+#     kp1, des1 = keypointsAndDescriptors(img1)
+#     kp2, des2 = keypointsAndDescriptors(img2)
     
-    matches = matched(des1, des2)
-    M, matchesMask, nInliers = findHomographyAndInliers(kp1, kp2, matches)
+#     matches = matched(des1, des2)
+#     M, matchesMask, nInliers = findHomographyAndInliers(kp1, kp2, matches)
 
-    if nInliers > 0:
-        img4 = cv2.warpPerspective(img1, M, (w2, h2))
-        img5 = cv2.addWeighted(img2, .7, img4, .3, 0)
-        sCD = scoreCenterDiff(img4, img2, .333)
-    else:
-        sCD = 0.0
+#     if nInliers > 0:
+#         img4 = cv2.warpPerspective(img1, M, (w2, h2))
+#         img5 = cv2.addWeighted(img2, .7, img4, .3, 0)
+#         sCD = scoreCenterDiff(img4, img2, .333)
+#     else:
+#         sCD = 0.0
 
-    sMatches = scoreMatches(matches, matchesMask, kp1, w1, h2, kp2, w2, h2)
+#     sMatches = scoreMatches(matches, matchesMask, kp1, w1, h2, kp2, w2, h2)
         
-    print("%d matches, %d inliers, final scores: (%f, %f, final %f)" % (
-        len(matches),
-        nInliers,
-        sMatches,
-        sCD,
-        scoreFinal(sMatches, sCD),
-    ))
+#     print("%d matches, %d inliers, final scores: (%f, %f, final %f)" % (
+#         len(matches),
+#         nInliers,
+#         sMatches,
+#         sCD,
+#         scoreFinal(sMatches, sCD),
+#     ))
 
-    img3 = cv2.drawMatchesKnn(
-        img1, kp1, img5, kp2, matches, None,
-        matchesMask = matchesMask,
-        singlePointColor = (0, 0, 255),
-        matchColor = (0, 255, 0),
-    )
+#     img3 = cv2.drawMatchesKnn(
+#         img1, kp1, img5, kp2, matches, None,
+#         matchesMask = matchesMask,
+#         singlePointColor = (0, 0, 255),
+#         matchColor = (0, 255, 0),
+#     )
 
-    plt.imshow(cv2.cvtColor(img3, cv2.COLOR_BGR2RGB))
-    plt.show()
+#     plt.imshow(cv2.cvtColor(img3, cv2.COLOR_BGR2RGB))
+#     plt.show()
 
-elif sys.argv[1] == "match-ref":
-    import glob
+# elif sys.argv[1] == "match-ref":
+#     import glob
     
-    refdata = dict()
+#     refdata = dict()
 
-    for reffile in glob.glob('references/d20/*.jpg'):
-        i = reffile.split('/')[-1].split('.')[0]
-        img = cv2.imread(reffile, -1)
-        refdata[i] = (
-            keypointsAndDescriptors(img),
-            img,
-        )
+#     for reffile in glob.glob('references/d20/*.jpg'):
+#         i = reffile.split('/')[-1].split('.')[0]
+#         img = cv2.imread(reffile, -1)
+#         refdata[i] = (
+#             keypointsAndDescriptors(img),
+#             img,
+#         )
 
-    for i in range(2, len(sys.argv)):
-        print(len(sys.argv))
-        print("{} {}".format(sys.argv[i], refmatch(cv2.imread(sys.argv[i], -1), refdata)))
-        # print ("%s %s") % (sys.argv[i], refmatch(cv2.imread(sys.argv[i], -1), refdata))
+#     for i in range(2, len(sys.argv)):
+#         print(len(sys.argv))
+#         print("{} {}".format(sys.argv[i], refmatch(cv2.imread(sys.argv[i], -1), refdata)))
+#         # print ("%s %s") % (sys.argv[i], refmatch(cv2.imread(sys.argv[i], -1), refdata))
     
-else:
-    usage()
+# else:
+#     usage()
