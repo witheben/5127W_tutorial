@@ -12,6 +12,7 @@ import tkinter as tk
 from autodice import *
 
 cv2image = None
+frame = None
 
 
 def better_dice_roll(dice_type, query_image):
@@ -21,14 +22,23 @@ def better_dice_roll(dice_type, query_image):
     3. Calculate the best score 
     '''
     start_time = time.time()
-    input_img = cv2.imread(query_image)
+    # input_img = cv2.imread(query_image)
+    input_img = query_image
     #1
     cropped_input_query = autocrop(input_img)
+    # print(input_img.shape)
+    cv2.imshow('test', cropped_input_query)
+    cv2.waitKey(0)
+    # print(input_img[0])
     #2
     refdata = dict()
     for reffile in glob.glob('references/{}/*.jpg'.format(dice_type)):
         i = reffile.split('/')[-1].split('.')[0]
+        
         img = cv2.imread(reffile, -1)
+        # cv2.imshow("idk", img)
+        # cv2.waitKey(0)
+        print(img.shape)
         refdata[i] = (
             keypointsAndDescriptors(img),
             img,
@@ -38,6 +48,16 @@ def better_dice_roll(dice_type, query_image):
     end_time = time.time()
     print("predicted dice roll on a {}: {}".format(dice_type, final_result))
     print("Finished in {} seconds".format((round((end_time-start_time), 2))))
+
+dice_number = 1
+def save_img(save_dir, input_image):
+    global dice_number
+    cropped_input_query = autocrop(input_image)
+    # print(input_img.shape)
+    cv2.imshow('test', cropped_input_query)
+    cv2.waitKey(0)
+    cv2.imwrite("{}/d{}_v2.jpg".format(save_dir, dice_number), cropped_input_query)
+    dice_number += 1
 
 
 
@@ -96,9 +116,14 @@ def run_GUI():
     
     def show_frame():
         global cv2image
+        global frame
         _, frame = cap.read()
+        # print(1)
+        # print(frame.shape)
         frame = cv2.flip(frame, 1)
+        # print(frame.shape)
         cv2image = cv2.cvtColor(frame, cv2.IMREAD_GRAYSCALE)
+        # print(cv2image.shape)
         # cv2.imshow('win', cv2image)
         # cv2.waitKey(0)
         img = Image.fromarray(cv2image)
@@ -107,18 +132,37 @@ def run_GUI():
         lmain.configure(image=imgtk)
         lmain.after(10, show_frame) 
     
-
+    # better_dice_roll(dice_type, query_image):
     d_12_roll = tk.Button(
     text="d12 Roll",
     width=10,
     height=5,
-    command=lambda: dice_roll("references/d12-v3", cv2image)
+    command=lambda: better_dice_roll(dice_type="d12-v4", query_image=frame)
     )
+    # d_12_roll = tk.Button(
+    # text="d12 Roll",
+    # width=10,
+    # height=5,
+    # command=lambda: dice_roll("references/d12-v3", cv2image)
+    # )
+    # d_20_roll = tk.Button(
+    #     text="d20 Roll",
+    #     width=10,
+    #     height=5,
+    #     command=lambda: better_dice_roll(dice_type="d20", query_image=frame)
+    # )
+    # d_20_roll = tk.Button(
+    #     text="d20 Roll",
+    #     width=10,
+    #     height=5,
+    #     command=lambda: dice_roll("references/d20", cv2image)
+    # )
+
     d_20_roll = tk.Button(
         text="d20 Roll",
         width=10,
         height=5,
-        command=lambda: dice_roll("references/d20", cv2image)
+        command=lambda: save_img("references/d12-v4", frame)
     )
     d_20_roll.grid(row=2, column=1)
     d_12_roll.grid(row=1, column=1)
@@ -132,21 +176,21 @@ def run_GUI():
     print("here")
 
 if __name__ == "__main__":
-    better_dice_roll(dice_type="d12-v3", query_image="test_inputs/d12-v2/10.jpg")
-    exit(0)
+    # better_dice_roll(dice_type="d12-v3", query_image="test_inputs/d12-v2/10.jpg")
+    # exit(0)
     run_GUI()
     
 
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
 
 
 
-    ret, frame = cap.read()
-    cv2.imshow("Webcam", frame)
-    cv2.waitKey(0)
+    # ret, frame = cap.read()
+    # cv2.imshow("Webcam", frame)
+    # cv2.waitKey(0)
 
 
 
     # Release the camera and close the window
-    cap.release()
-    cv2.destroyAllWindows()
+    # cap.release()
+    # cv2.destroyAllWindows()

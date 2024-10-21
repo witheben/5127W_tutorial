@@ -89,8 +89,8 @@ def refmatch(img, refdata):
             continue
         
         M, matchesMask, nInliers = findHomographyAndInliers(refdata[i][0][0], kp, matches)
-        # print("key: {}".format(i))
-        # print("inliers: {}\n".format(nInliers))
+        print("key: {}".format(i))
+        print("inliers: {}\n".format(nInliers))
         if nInliers <= 10:
             continue
 
