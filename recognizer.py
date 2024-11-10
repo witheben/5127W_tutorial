@@ -28,20 +28,15 @@ def better_dice_roll(dice_type, query_image):
     3. Calculate the best score 
     '''
     start_time = time.time()
-    # input_img = cv2.imread(query_image)
     input_img = query_image
     #1
     cropped_input_query = autocrop(input_img)
-    # print(input_img.shape)
-    # print(input_img[0])
     #2
     refdata = dict()
     for reffile in glob.glob('references/{}/*.jpg'.format(dice_type)):
         i = reffile.split('/')[-1].split('.')[0]
         
         img = cv2.imread(reffile, -1)
-        # cv2.imshow("idk", img)
-        # cv2.waitKey(0)
         print(img.shape)
         refdata[i] = (
             keypointsAndDescriptors(img),
@@ -61,7 +56,6 @@ dice_number = 1
 def save_img(save_dir, input_image):
     global dice_number
     cropped_input_query = autocrop(input_image)
-    # print(input_img.shape)
     cv2.imshow('test', cropped_input_query)
     cv2.waitKey(0)
     print(save_dir)
@@ -70,44 +64,7 @@ def save_img(save_dir, input_image):
 
 
 
-def dice_roll(ref_images_path, query_image):
-    highest_score = 0
-    image = ""
-    # ref_images_path = "references/d12-v3"
-    # query_image = "test_inputs/d12-v2/4.jpg"
-    img2 = query_image
-    for i in tqdm(os.listdir(ref_images_path)):
-        img1 = cv2.imread(os.path.join(ref_images_path, i), cv2.IMREAD_GRAYSCALE)
-        # img2 = cv2.imread(query_image, cv2.IMREAD_GRAYSCALE)
-        
-        # Initiate ORB detector
-        orb = cv2.ORB_create()
-        
-        # find the keypoints and descriptors with ORB
-        kp1, des1 = orb.detectAndCompute(img1,None)
-        kp2, des2 = orb.detectAndCompute(img2,None)
 
-        # create BFMatcher object
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        
-        # Match descriptors.
-        matches = bf.match(des1,des2)
-        
-        # # Sort them in the order of their distance.
-        # matches = sorted(matches, key = lambda x:x.distance)
-        
-        # # Draw first 10 matches.
-        # img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-
-        if len(matches) > highest_score:
-            highest_score = len(matches)
-            image = i
-        # print()
-        # print(i)
-        # print(len(matches))
-        # plt.imshow(img3),plt.show()
-    print(highest_score)
-    print(image)
 
 def run_GUI():
     window = tk.Tk()
@@ -205,16 +162,9 @@ def run_GUI_v2():
         global cv2image
         global frame
         _, frame = cap.read()
-        # print(1)
-        # print(frame.shape)
         frame = cv2.flip(frame, 1)
-        # print(frame.shape)
         cv2image = cv2.cvtColor(frame, cv2.IMREAD_GRAYSCALE)
-        # print(cv2image.shape)
-        # cv2image = cv2.resize(cv2image, (500, 500))
-        # cv2.imshow('win', cv2image)
 
-        # cv2.waitKey(0)
         img = Image.fromarray(cv2image)
         imgtk = ImageTk.PhotoImage(image=img)
         lmain.imgtk = imgtk
@@ -224,20 +174,24 @@ def run_GUI_v2():
 
     buttonframe = tk.Frame(window, width=500, height=500)
     buttonframe.grid(row=0, column=1)
-    # better_dice_roll(dice_type, query_image):
     d_12_roll = tk.Button(buttonframe,
     text="d12 Roll",
     width=10,
     height=5,
     bg='#22631b',
-    command=lambda: better_dice_roll(dice_type="d12-v4", query_image=frame)
+    command=lambda: roll_d12()
     )
-    # d_12_roll = tk.Button(
-    # text="d12 Roll",
-    # width=10,
-    # height=5,
-    # command=lambda: dice_roll("references/d12-v3", cv2image)
-    # )
+
+
+    def roll_d12():
+        GWM = gwm.get()
+        rage = RAGE.get()
+        damage_value = int(better_dice_roll(dice_type="d12-v4", query_image=frame))
+        damage_value = damage_value + 10 if GWM else damage_value
+        damage_value = damage_value + rage_bonus if rage else damage_value
+        damage_value += strength_bonus
+        
+
     d_20_roll = tk.Button(buttonframe,
         text="d20 Roll",
         width=10,
@@ -251,20 +205,18 @@ def run_GUI_v2():
     def roll_d20():
         GWM = gwm.get()
         attack_value = int(better_dice_roll(dice_type="d20-v2", query_image=frame))
-        print(attack_value)
         attack_value = attack_value - 5 if GWM else attack_value
         attack_value += strength_bonus + weapon_bonus + prof_bonus
-        print(attack_value)
         result_text.delete("1.0", tk.END)
         result_text.insert(tk.INSERT, f"{attack_value}")
         return
 
+    
+
     gwm = tk.BooleanVar()
     rage = tk.BooleanVar()
-    svge = tk.BooleanVar()
     GWM = tk.Checkbutton(buttonframe, text="Using GWM?", variable=gwm, onvalue=True, offvalue=False)
     RAGE = tk.Checkbutton(buttonframe, text="Raging?", variable=rage, onvalue=True, offvalue=False)
-    SAVAGE_ATTACK = tk.Checkbutton(buttonframe, text="Savage Attack?", variable=svge, onvalue=True, offvalue=False)
     
     roll_label = tk.Label(buttonframe, text="Result from the roll and math!")
     result_text = tk.Text(buttonframe,
@@ -275,9 +227,16 @@ def run_GUI_v2():
     d_12_roll.pack()
     d_20_roll.pack()
 
+    # save_frame = tk.Button(buttonframe,
+    #     text="save ref",
+    #     width=10,
+    #     height=5,
+    #     command=lambda: save_img("references/d20-v2", frame)
+    # )
+    # save_frame.pack()
+
     GWM.pack()
     RAGE.pack()
-    SAVAGE_ATTACK.pack()
     roll_label.pack()
     result_text.pack()
 
@@ -297,16 +256,42 @@ if __name__ == "__main__":
     run_GUI_v2()
     
 
-    # cap = cv2.VideoCapture(0)
 
 
 
-    # ret, frame = cap.read()
-    # cv2.imshow("Webcam", frame)
-    # cv2.waitKey(0)
 
+# def dice_roll(ref_images_path, query_image):
+#     highest_score = 0
+#     image = ""
+#     # ref_images_path = "references/d12-v3"
+#     # query_image = "test_inputs/d12-v2/4.jpg"
+#     img2 = query_image
+#     for i in tqdm(os.listdir(ref_images_path)):
+#         img1 = cv2.imread(os.path.join(ref_images_path, i), cv2.IMREAD_GRAYSCALE)
+#         # img2 = cv2.imread(query_image, cv2.IMREAD_GRAYSCALE)
+        
+#         # Initiate ORB detector
+#         orb = cv2.ORB_create()
+        
+#         # find the keypoints and descriptors with ORB
+#         kp1, des1 = orb.detectAndCompute(img1,None)
+#         kp2, des2 = orb.detectAndCompute(img2,None)
 
+#         # create BFMatcher object
+#         bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        
+#         # Match descriptors.
+#         matches = bf.match(des1,des2)
+        
+#         # # Sort them in the order of their distance.
+#         # matches = sorted(matches, key = lambda x:x.distance)
+        
+#         # # Draw first 10 matches.
+#         # img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
-    # Release the camera and close the window
-    # cap.release()
-    # cv2.destroyAllWindows()
+#         if len(matches) > highest_score:
+#             highest_score = len(matches)
+#             image = i
+
+#     print(highest_score)
+#     print(image)
