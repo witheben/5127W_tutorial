@@ -46,18 +46,21 @@ There are two main benefits to cropping the image; it lets the algorithm run fas
 
 
 ![Screenshot 2024-11-13 100649](https://github.com/user-attachments/assets/7806580f-905d-45ca-8c5b-1b035ff6f5ce)
+
 Here we can see the input image (top left) the edges (top right) and the final cropped image (bottom)
 
 Reference Matching
 The reference matching works by first feeding in all reference images into a sift keypoint detection algorithm https://docs.opencv.org/4.x/da/df5/tutorial_py_sift_intro.html. Once all of that information is calculated we can do that same with the image of the dice we are trying to detect. We then use all of the keypoints and find the transformation matrix using homography. Homography gives us the matching points of each image. Since there could be “bad” points we only take the inliers, or “good” matches. The reference image with the most amount of inliers is assumed to be the correct dice face.
 
 ![Screenshot 2024-11-13 100800](https://github.com/user-attachments/assets/20b8e07e-c246-42c4-8d55-979b982fb4db)
+
 The keypoints found (in red) and the inliers of those keypoints (red points with green lines)
 
 How It All Comes Together
 	The nice thing about knowing that the purpose of this is for online games, is that we know the user will be at their computer. With that we can make a little GUI to make our lives a bit easier. The basic flow is that you will roll your dice and then in the GUI select which dice you rolled. This will tell the system which reference file it should be looking at. Right now it displays the prediction in the terminal, but that will be changed to show in the GUI itself so that all of the interaction is self-contained in the GUI. The reason that I only have d12’s and d20’s set up is because those are the only two dice I ever have to do any math on. If you want to use other dice, just follow the set up steps above and create reference folders for those dice, and add additional buttons in the GUI for those dice by copy and pasting the button setup that is in there now. It is worth noting that you will likely need to manually adjust the zoom and focus of your camera to get consistent results.
  
 ![Screenshot 2024-11-13 100829](https://github.com/user-attachments/assets/b82954d5-1474-4b85-9e86-cb2a80ecab2d)
+
 The GUI on the left was the initial prototype while the right is the final version.
 
 Extendability
@@ -65,6 +68,7 @@ Extendability
 
 Step 1: Collecting reference images
 	To start collecting new reference images for you dice, find these lines of code in the run_GUI_v2() function and uncomment them;
+ 
  ![Screenshot 2024-11-13 100917](https://github.com/user-attachments/assets/94b7f7d4-8fa2-478b-9714-6f2d9dc09c9d)
 
 This will add a “save ref” button to the GUI. You will need to change the filepath in the save_img() function in the “command” argument to correspond to the location and dice number you are saving, this must be done for any new dice being saved. Then, all you need to do is work through the GUI and press the “save ref” button on each dice race. MAKE SURE you take the reference images in order from one to the max dice face. You will need to restart if you go out of order, or take new references for new dice.
@@ -72,6 +76,7 @@ This will add a “save ref” button to the GUI. You will need to change the fi
 Step 2: Adding a button
 
 ![Screenshot 2024-11-13 100937](https://github.com/user-attachments/assets/5d867289-e750-4d57-afd5-3d02b3ee3de3)
+
 This image will be the reference for the rest of this section.
 
 Starting at the top of the image, use tk.Button to create a new button. The “buttonFrame” variable doesn’t matter but if you want to learn more you can google “Tkinter frames”, they let you define different subsections in the display. To make the button do something we set a function in the “command” argument. Here we are using “roll_d20()”, because it is the d20 button. Skipping over the “roll_d20()” function for now, the next two lines with “gwm” and “GWM” define the check boxes seen in the GUI, again you can make this whatever you like. These are followed by the “pack()” we saw earlier. Going back up to “roll_d20()” we will see how to add any check values to our roll. We first pull the value of the checkbox and use our “better_dice_roll” function (the “dice_type” should be the name of the folder within the “references” directory defined earlier). We can then start adding values to the roll based on the condition of the GWM checkbox. Finally we output it to the text box. Many of the variables seen that aren’t defined in the screen shot are global variables that can be changed to anything, just change them and their values and add them to functions like “roll_d20()” whenever you need to.
@@ -80,4 +85,5 @@ Short Story Time:
 So I did use this the last DnD session I had and it was super nice to not have to do any math, but I proceeded to roll incredibly poorly. I think I only rolled above five 3 times over the course of three hours. So while this does work and is, in my opinion, very cool, it will not help you roll better!
 
 ![Screenshot 2024-11-13 101009](https://github.com/user-attachments/assets/20f34c1d-73ec-4066-a009-b3c5c6b84e20)
+
 This is what it looks like when you roll
