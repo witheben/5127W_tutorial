@@ -14,8 +14,10 @@ Materials needed
  - A flat colored background
  - A webcam
 This does require some additional folder structure set up before running any code. You will need individual folders with reference images of each face of the dice you want to use. For example here are some of my 20 sided dice.
+
 ![tes5](https://github.com/user-attachments/assets/01810f4d-5256-426f-aa31-aeeb37539b35)
 ![test](https://github.com/user-attachments/assets/dd697289-6465-4912-b319-df297e7f5b64)
+
 Be sure to take them with the camera that you will be using when you are detecting them, and also crop them as tight as you can. The latter helps make the vision system run faster.
 	Because I the two main dice I want this to run are a 12 and 20 sided dice, I have my reference structure as follows
 
