@@ -80,9 +80,7 @@ def refmatch(img, refdata):
     kp, des = keypointsAndDescriptors(img)
     
     inl = []
-    # print(refdata)
-    # print(refdata['d20'][0][1])
-    # print(refdata['d20'][0][0])
+
     for i in refdata.keys():
         matches = matched(refdata[i][0][1], des)
         if len(matches) <= 10:
@@ -115,6 +113,11 @@ def refmatch(img, refdata):
         return inl[0][1]
     else:
         return '?'
+
+
+'''
+This is code that you can uncomment if you'd like to test this functionality independently.
+'''
 
 # if len(sys.argv) == 1:
 #     usage()

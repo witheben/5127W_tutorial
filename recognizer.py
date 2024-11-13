@@ -21,6 +21,14 @@ cv2image = None
 frame = None
 
 
+'''
+better_dice_roll
+    inputs:
+        - dice_type: the name of the folder in the "references" directory to look for matches in
+        - query_image: the image to do the comparison with
+    outputs:
+        - roll_value: the detected value of the dice
+'''
 def better_dice_roll(dice_type, query_image):
     '''
     1. Autocrop the query image
@@ -52,6 +60,14 @@ def better_dice_roll(dice_type, query_image):
     print("Finished in {} seconds".format((round((end_time-start_time), 2))))
     return roll_value
 
+'''
+save_img
+    inputs:
+        - save_dir: directory to save the frames into
+        - input_image: the image to save 
+    outputs:
+        - none
+'''
 dice_number = 1
 def save_img(save_dir, input_image):
     global dice_number
@@ -64,91 +80,15 @@ def save_img(save_dir, input_image):
 
 
 
-
-
-def run_GUI():
-    window = tk.Tk()
-    window.geometry("665x1000")
-    window.title("DnD calculate dice roll")
-
-    # #Graphics window
-    imageFrame = tk.Frame(window, width=500, height=500)
-    imageFrame.grid(row=0, column=0, padx=10, pady=2)
-
-    #Capture video frames
-    lmain = tk.Label(imageFrame)
-    lmain.grid(row=0, column=0)
-    cap = cv2.VideoCapture(0)
-    
-    def show_frame():
-        global cv2image
-        global frame
-        _, frame = cap.read()
-        # print(1)
-        # print(frame.shape)
-        frame = cv2.flip(frame, 1)
-        # print(frame.shape)
-        cv2image = cv2.cvtColor(frame, cv2.IMREAD_GRAYSCALE)
-        # print(cv2image.shape)
-        # cv2image = cv2.resize(cv2image, (500, 500))
-        # cv2.imshow('win', cv2image)
-
-        # cv2.waitKey(0)
-        img = Image.fromarray(cv2image)
-        imgtk = ImageTk.PhotoImage(image=img)
-        lmain.imgtk = imgtk
-        lmain.configure(image=imgtk)
-        lmain.after(10, show_frame) 
-    
-    # better_dice_roll(dice_type, query_image):
-    d_12_roll = tk.Button(
-    text="d12 Roll",
-    width=10,
-    height=5,
-    bg='#22631b',
-    command=lambda: better_dice_roll(dice_type="d12-v4", query_image=frame)
-    )
-    # d_12_roll = tk.Button(
-    # text="d12 Roll",
-    # width=10,
-    # height=5,
-    # command=lambda: dice_roll("references/d12-v3", cv2image)
-    # )
-    d_20_roll = tk.Button(
-        text="d20 Roll",
-        width=10,
-        height=5,
-        bg='#756a22',
-        command=lambda: better_dice_roll(dice_type="d20-v2", query_image=frame)
-    )
-    # d_20_roll = tk.Button(
-    #     text="d20 Roll",
-    #     width=10,
-    #     height=5,
-    #     command=lambda: dice_roll("references/d20", cv2image)
-    # )
-
-    # save_frame = tk.Button(
-    #     text="save ref",
-    #     width=10,
-    #     height=5,
-    #     command=lambda: save_img("references/d20-v2", frame)
-    # )
-    d_12_roll.grid(row=1, column=0, sticky='nsew')
-    d_20_roll.grid(row=2, column=0, sticky="nsew")
-    # save_frame.grid(row=2, column=0)
-
-
-
-    show_frame()
-    window.mainloop()
-
+'''
+Runs the GUI and controls all of the button logig
+'''
 def run_GUI_v2():
     window = tk.Tk()
     window.geometry("900x550")
     window.title("DnD calculate dice roll")
 
-    # #Graphics window
+    # Graphics window - this sets up the frame in Tkinter that contains the video feed
     imageFrame = tk.Frame(window, width=500, height=500)
     imageFrame.grid(row=0, column=0, padx=10, pady=2)
 
@@ -158,6 +98,8 @@ def run_GUI_v2():
     lmain.pack()
     cap = cv2.VideoCapture(0)
     
+    # this controls the logic for displaying the video feed in Tkinter
+    # the only thing worth noting is that the frame is stored in a global variable to make it available to other function
     def show_frame():
         global cv2image
         global frame
@@ -172,17 +114,20 @@ def run_GUI_v2():
         lmain.after(10, show_frame) 
     
 
+    # Sets up the second frame in tkinter that contains the buttons and checkboxes
     buttonframe = tk.Frame(window, width=500, height=500)
     buttonframe.grid(row=0, column=1)
+
+    # button setup
     d_12_roll = tk.Button(buttonframe,
-    text="d12 Roll",
-    width=10,
-    height=5,
-    bg='#22631b',
-    command=lambda: roll_d12()
+        text="d12 Roll",
+        width=10,
+        height=5,
+        bg='#22631b',
+        command=lambda: roll_d12()
     )
 
-
+    # function that the button above calls
     def roll_d12():
         GWM = gwm.get()
         rage = RAGE.get()
@@ -212,7 +157,7 @@ def run_GUI_v2():
         return
 
     
-
+    # checkbox set up
     gwm = tk.BooleanVar()
     rage = tk.BooleanVar()
     GWM = tk.Checkbutton(buttonframe, text="Using GWM?", variable=gwm, onvalue=True, offvalue=False)
@@ -223,10 +168,13 @@ def run_GUI_v2():
                           width=3,
                           height=1,
                           font=('Helvetica', 32))
-
+    # packs the buttons in the frame, the ordering looks odd here, but it forces them into the right place when running
     d_12_roll.pack()
     d_20_roll.pack()
 
+    '''
+    uncomment out to add a button for adding reference images
+    '''
     # save_frame = tk.Button(buttonframe,
     #     text="save ref",
     #     width=10,
@@ -240,58 +188,11 @@ def run_GUI_v2():
     roll_label.pack()
     result_text.pack()
 
-
-    # save_frame.grid(row=2, column=0)
-
-
-
     show_frame()
     window.mainloop()
 
 
 if __name__ == "__main__":
-    # better_dice_roll(dice_type="d12-v3", query_image="test_inputs/d12-v2/10.jpg")
-    # exit(0)
-    # run_GUI()
+
     run_GUI_v2()
     
-
-
-
-
-
-# def dice_roll(ref_images_path, query_image):
-#     highest_score = 0
-#     image = ""
-#     # ref_images_path = "references/d12-v3"
-#     # query_image = "test_inputs/d12-v2/4.jpg"
-#     img2 = query_image
-#     for i in tqdm(os.listdir(ref_images_path)):
-#         img1 = cv2.imread(os.path.join(ref_images_path, i), cv2.IMREAD_GRAYSCALE)
-#         # img2 = cv2.imread(query_image, cv2.IMREAD_GRAYSCALE)
-        
-#         # Initiate ORB detector
-#         orb = cv2.ORB_create()
-        
-#         # find the keypoints and descriptors with ORB
-#         kp1, des1 = orb.detectAndCompute(img1,None)
-#         kp2, des2 = orb.detectAndCompute(img2,None)
-
-#         # create BFMatcher object
-#         bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        
-#         # Match descriptors.
-#         matches = bf.match(des1,des2)
-        
-#         # # Sort them in the order of their distance.
-#         # matches = sorted(matches, key = lambda x:x.distance)
-        
-#         # # Draw first 10 matches.
-#         # img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-
-#         if len(matches) > highest_score:
-#             highest_score = len(matches)
-#             image = i
-
-#     print(highest_score)
-#     print(image)
