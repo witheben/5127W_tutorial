@@ -2,4 +2,6 @@ references/*
 
 test_inputs/
 
-_pycache_
+__pycache__
+
+.DS_Store
