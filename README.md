@@ -39,7 +39,7 @@ The main part of the physical set up is the camera. Depending on the webcam you 
 This was the final version of the physical set up that doubled as a dice tower.
 
 ## How It Works
-	To start I have to give credit to this github repo https://github.com/Artefact2/autodice/tree/master. They used a really easily understood, and fast set up. The two main components are 1) image cropping and 2) reference matching.
+To start I have to give credit to this github repo https://github.com/Artefact2/autodice/tree/master. They used a really easily understood, and fast set up. The two main components are 1) image cropping and 2) reference matching.
 
 ### Image Cropping
 There are two main benefits to cropping the image; it lets the algorithm run faster as there are less pixels to look at, as well as it makes all of the information for the reference matching relevant. Meaning there is no extraneous pixel information in the image. The cropping starts with an edge detection. The image is taken and fed through opencv’s Canny function which applies Canny Edge detection (if you want to dig deeper here is their documentation https://docs.opencv.org/4.x/da/d22/tutorial_py_canny.html, but for this all we need to know is that it finds the edges). Once the edges are found we use opencv’s boundingRect function https://docs.opencv.org/4.x/dd/d49/tutorial_py_contour_features.html . This essentially draws a box around the edges and we can use values of that box to crop the image using some numpy syntax.
